@@ -1,11 +1,12 @@
 {
-  "presets": ["env"],
-  "plugins": ["babel-plugin-add-module-exports"],
-  "env": {
-    "test": {
-      "plugins": [
-        ["istanbul"]
-      ]
-    }
-  }
+  "presets": [
+    [
+      "@nrwl/react/babel",
+      {
+        "runtime": "automatic",
+        "useBuiltIns": "usage"
+      }
+    ]
+  ],
+  "plugins": []
 }
