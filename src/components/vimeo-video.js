@@ -25,6 +25,8 @@ export default class VimeoVideo extends EventEmitter {
     this.muted = typeof args.muted !== 'undefined' ? args.muted : false
     this.autoplay = typeof args.autoplay !== 'undefined' ? args.autoplay : true
     this.loop = typeof args.loop !== 'undefined' ? args.loop : true
+    // NOTE: screw this
+    /*
     this.onClickAutoplayFix = () => this._onClickAutoplayFix()
 
     if (this.autoplay) {
@@ -36,7 +38,7 @@ export default class VimeoVideo extends EventEmitter {
           window.addEventListener('click', this.onClickAutoplayFix)
         }
       })
-    }
+    } */
   }
 
   /**
