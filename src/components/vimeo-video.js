@@ -370,6 +370,6 @@ export default class VimeoVideo extends EventEmitter {
    * @returns {bool}
    */
   isDashPlayback () {
-    return this.isAdaptivePlayback()
+    return this.isAdaptivePlayback() && !Util.isiOS();
   }
 }
