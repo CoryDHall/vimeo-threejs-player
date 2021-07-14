@@ -25,14 +25,15 @@ export default class VimeoVideo extends EventEmitter {
     this.muted = typeof args.muted !== 'undefined' ? args.muted : false
     this.autoplay = typeof args.autoplay !== 'undefined' ? args.autoplay : true
     this.loop = typeof args.loop !== 'undefined' ? args.loop : true
+    this.onClickAutoplayFix = () => this._onClickAutoplayFix()
 
     if (this.autoplay) {
-      canAutoPlay.video({ muted: this.muted, timeout: 5000 }).then(({ result, error }) => {
+      canAutoPlay.video({ muted: this.muted, timeout: 20000 }).then(({ result, error }) => {
         if (result === false) {
           console.warn('[Vimeo] Autoplay not available on this browser', error)
           this.autoplay = false
 
-          window.addEventListener('click', this.onClickAutoplayFix.bind(this))
+          window.addEventListener('click', this.onClickAutoplayFix)
         }
       })
     }
@@ -41,9 +42,14 @@ export default class VimeoVideo extends EventEmitter {
   /**
    * An internal method that removes that hits play for autoplay fix event listener, should not be used from outside the class
    */
-  onClickAutoplayFix () {
-    this.play()
-    window.removeEventListener('click', this.onClickAutoplayFix.bind(this))
+  onClickAutoplayFix;
+  _onClickAutoplayFix () {
+    try {
+      this.play()
+    } catch (err) {
+      console.warn(err);
+    }
+    window.removeEventListener('click', this.onClickAutoplayFix)
   }
 
   /**
@@ -362,6 +368,6 @@ export default class VimeoVideo extends EventEmitter {
    * @returns {bool}
    */
   isDashPlayback () {
-    return this.isAdaptivePlayback() && !Util.isiOS()
+    return this.isAdaptivePlayback()
   }
 }
