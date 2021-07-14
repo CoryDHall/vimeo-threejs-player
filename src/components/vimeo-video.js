@@ -1,10 +1,10 @@
-/* global THREE */
 import VideoQuality from './video-quality'
 import VideoElement from './video-element'
 import Util from './util'
 import API from './api'
 import canAutoPlay from 'can-autoplay'
 import EventEmitter from 'event-emitter-es6'
+import * as THREE from 'three';
 
 /** Class representing a Vimeo video resource */
 export default class VimeoVideo extends EventEmitter {
@@ -27,7 +27,7 @@ export default class VimeoVideo extends EventEmitter {
     this.loop = typeof args.loop !== 'undefined' ? args.loop : true
 
     if (this.autoplay) {
-      canAutoPlay.video({ muted: this.muted, timeout: 1000 }).then(({ result, error }) => {
+      canAutoPlay.video({ muted: this.muted, timeout: 5000 }).then(({ result, error }) => {
         if (result === false) {
           console.warn('[Vimeo] Autoplay not available on this browser', error)
           this.autoplay = false
