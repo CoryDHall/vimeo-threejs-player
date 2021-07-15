@@ -50,7 +50,7 @@ export default class Player extends EventEmitter {
         }
 
         resolve(players)
-      })
+      }, reject)
     })
   }
 

@@ -181,6 +181,7 @@ export default class VideoElement extends EventEmitter {
     domElement.muted = vimeoVideo.muted
     domElement.autoplay = vimeoVideo.autoplay
     domElement.loop = vimeoVideo.loop
+    // vimeoVideo.muted && domElement.setAttribute('muted', '')
 
     return domElement
   }
@@ -215,7 +216,7 @@ export default class VideoElement extends EventEmitter {
    * @param {HTMLElement} vimeoVideo - A <video> element that needs to be configured to play on iOS
    */
   setiOSPlayerAttributes (videoElement) {
-    videoElement.setAttribute('webkit-playsinline', 'webkit-playsinline')
-    videoElement.setAttribute('playsinline', 'playsinline')
+    videoElement.setAttribute('webkit-playsinline', '')
+    videoElement.setAttribute('playsinline', '')
   }
 }
