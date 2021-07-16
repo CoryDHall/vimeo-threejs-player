@@ -1,6 +1,6 @@
-import VimeoVideo, { VimeoVideoArgs } from './vimeo-video'
-import API from './api'
-import EventEmitter from 'event-emitter-es6'
+import VimeoVideo, { VimeoVideoArgs } from './vimeo-video';
+import API from './api';
+import EventEmitter from 'event-emitter-es6';
 import VideoQuality from './video-quality';
 
 type PlayerArgs = VimeoVideoArgs & {
@@ -22,18 +22,18 @@ export default class Player extends EventEmitter {
    * @param {bool} [args.loop = true] - A boolean for looping the video playback when it reaches the end
    */
   constructor (videoId: string | number, args: PlayerArgs = {}) {
-    super()
+    super();
 
     if (!videoId) {
-      throw new Error('[Vimeo] Video ID is required')
+      throw new Error('[Vimeo] Video ID is required');
     }
 
-    this.id = this.parseVideoId(videoId)
-    this.video = new VimeoVideo(this.id, args)
-    this.bindEvents()
+    this.id = this.parseVideoId(videoId);
+    this.video = new VimeoVideo(this.id, args);
+    this.bindEvents();
 
     if (args.autoload) {
-      this.load()
+      this.load();
     }
   }
 
@@ -47,35 +47,35 @@ export default class Player extends EventEmitter {
    * @param {bool} [args.loop = true] - A boolean for looping the video playback when it reaches the end
    */
   static loadPlayersByAlbum (albumId: number, args: PlayerArgs = {}) {
-    let players: Player[] = []
+    const players: Player[] = [];
 
     return new Promise<Player[]>((resolve, reject) => {
       API.getAlbumVideos(albumId).then(resp => {
         for (let i = 0; i < resp.data.length; i++) {
-          let player = new Player(resp.data[i].uri, args)
-          player.video.data = resp.data[i]
-          players.push(player)
+          const player = new Player(resp.data[i].uri, args);
+          player.video.data = resp.data[i];
+          players.push(player);
         }
 
-        resolve(players)
-      }, reject)
-    })
+        resolve(players);
+      }, reject);
+    });
   }
 
   /** Bind all player event emitters, used internally */
   bindEvents () {
     this.video.on('metadataLoad', () => {
-      this.emit('metadataLoad')
-    })
+      this.emit('metadataLoad');
+    });
 
     this.video.on('videoLoad', (videoTexture) => {
-      this.texture = this.video.texture
-      this.emit('videoLoad', videoTexture)
-    })
+      this.texture = this.video.texture;
+      this.emit('videoLoad', videoTexture);
+    });
 
     this.video.on('play', () => {
-      this.emit('play')
-    })
+      this.emit('play');
+    });
   }
 
   /**
@@ -84,7 +84,7 @@ export default class Player extends EventEmitter {
    * @returns {number}
    */
   parseVideoId (id: number | string): number {
-    return parseInt((id.toString().match(/([0-9]+)/) || ['',''])[1])
+    return parseInt((id.toString().match(/([0-9]+)/) || ['', ''])[1]);
   }
 
   /**
@@ -92,7 +92,7 @@ export default class Player extends EventEmitter {
    * @returns {number}
    */
   getVideoId (): number {
-    return this.id
+    return this.id;
   }
 
   /**
@@ -101,9 +101,9 @@ export default class Player extends EventEmitter {
    */
   getMetadata (): unknown | undefined {
     if (this.video) {
-      return this.video.getJSONFromVideoDescription()
+      return this.video.getJSONFromVideoDescription();
     } else {
-      console.warn('[Vimeo] No video is loaded but you are trying to get the metadata')
+      console.warn('[Vimeo] No video is loaded but you are trying to get the metadata');
     }
     return;
   }
@@ -114,26 +114,26 @@ export default class Player extends EventEmitter {
    */
   getDescription (): string | undefined {
     if (this.video) {
-      return this.video.data?.description
+      return this.video.data?.description;
     } else {
-      console.warn('[Vimeo] No video is loaded but you are trying to get the description')
+      console.warn('[Vimeo] No video is loaded but you are trying to get the description');
     }
     return;
   }
 
   /** Mute the video */
   mute () {
-    this.video.mute()
+    this.video.mute();
   }
 
   /** Unmute the video */
   unmute () {
-    this.video.unmute()
+    this.video.unmute();
   }
 
   /** Load the current video */
   load () {
-    this.video.load()
+    this.video.load();
   }
 
   /**
@@ -141,7 +141,7 @@ export default class Player extends EventEmitter {
    * @param {VideoQuality} quality - The desired quality setting
    */
   setQuality (quality: VideoQuality) {
-    this.video.selectedQuality = quality
+    this.video.selectedQuality = quality;
   }
 
   /**
@@ -149,7 +149,7 @@ export default class Player extends EventEmitter {
    * @returns {number}
    */
   getQuality (): VideoQuality {
-    return this.video.selectedQuality
+    return this.video.selectedQuality;
   }
 
   /**
@@ -157,7 +157,7 @@ export default class Player extends EventEmitter {
    * @returns {number}
    */
   getWidth (): number {
-    return this.video.getWidth() || 0
+    return this.video.getWidth() || 0;
   }
 
   /**
@@ -165,7 +165,7 @@ export default class Player extends EventEmitter {
    * @returns {number}
    */
   getHeight (): number {
-    return this.video.getHeight() || 0
+    return this.video.getHeight() || 0;
   }
 
   /**
@@ -173,7 +173,7 @@ export default class Player extends EventEmitter {
    * @returns {bool}
    */
   isPlaying (): boolean | undefined {
-    return this.video.isPlaying()
+    return this.video.isPlaying();
   }
 
   /**
@@ -181,7 +181,7 @@ export default class Player extends EventEmitter {
    * @returns {bool}
    */
   isPaused (): boolean | undefined {
-    return this.video.isPaused()
+    return this.video.isPaused();
   }
 
   /**
@@ -189,7 +189,7 @@ export default class Player extends EventEmitter {
    * @returns {bool}
    */
   isStopped (): boolean | undefined {
-    return this.video.isStopped()
+    return this.video.isStopped();
   }
 
   /**
@@ -197,7 +197,7 @@ export default class Player extends EventEmitter {
    * @returns {number}
    */
   getTime (): number | undefined {
-    return this.video.getTime()
+    return this.video.getTime();
   }
 
   /**
@@ -205,19 +205,19 @@ export default class Player extends EventEmitter {
    * @param {number} time - the time to set the current video to
    */
   setTime (time: number): void {
-    this.video.setTime(time)
+    this.video.setTime(time);
   }
 
   /** Play the video */
   play () {
     if (this.video) {
       try {
-        this.video.play()
+        this.video.play();
       } catch (error) {
-        throw new Error('[Vimeo] Video provided is not correct, try changing the video id and running the code again')
+        throw new Error('[Vimeo] Video provided is not correct, try changing the video id and running the code again');
       }
     } else {
-      console.warn('[Vimeo] Video has not been loaded yet, try calling player.load()')
+      console.warn('[Vimeo] Video has not been loaded yet, try calling player.load()');
     }
   }
 
@@ -225,9 +225,9 @@ export default class Player extends EventEmitter {
   pause () {
     if (this.video) {
       try {
-        this.video.pause()
+        this.video.pause();
       } catch (error) {
-        throw new Error('[Vimeo] Video provided is not correct, try changing the video id and running the code again')
+        throw new Error('[Vimeo] Video provided is not correct, try changing the video id and running the code again');
       }
     }
   }
@@ -236,9 +236,9 @@ export default class Player extends EventEmitter {
   stop () {
     if (this.video) {
       try {
-        this.video.stop()
+        this.video.stop();
       } catch (error) {
-        throw new Error('[Vimeo] Video provided is not correct, try changing the video id and running the code again')
+        throw new Error('[Vimeo] Video provided is not correct, try changing the video id and running the code again');
       }
     }
   }
@@ -249,7 +249,7 @@ export default class Player extends EventEmitter {
    */
   setVolume (volume: number) {
     if (this.video) {
-      this.video.setVolume(volume)
+      this.video.setVolume(volume);
     }
   }
 }

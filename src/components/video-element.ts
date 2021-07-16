@@ -1,18 +1,18 @@
-import Util from './util'
-import dashjs from 'dashjs'
-import EventEmitter from 'event-emitter-es6'
-import VimeoVideo from './vimeo-video'
+import Util from './util';
+import dashjs from 'dashjs';
+import EventEmitter from 'event-emitter-es6';
+import VimeoVideo from './vimeo-video';
 
 /** Class representing a DOM video element */
 
 type VideoDashElement = {
   player: dashjs.MediaPlayerClass;
   _isDashPlayback: true;
-}
+};
 type VideoHTMLElement = {
   player: HTMLVideoElement;
   _isDashPlayback: false;
-}
+};
 type P = dashjs.MediaPlayerClass | HTMLVideoElement;
 export default class VideoElement extends EventEmitter {
   domElement: HTMLVideoElement;
@@ -29,19 +29,19 @@ export default class VideoElement extends EventEmitter {
    * @param {VimeoVideo} vimeoVideo - A VimeoVideo object representing the video resource
    */
   constructor (vimeoVideo: VimeoVideo) {
-    super()
+    super();
 
-    this.domElement = this.createElement(vimeoVideo)
+    this.domElement = this.createElement(vimeoVideo);
     this.domElement.addEventListener('loadeddata', () => {
       if (this.domElement.readyState >= 2) {
         if (vimeoVideo.autoplay) {
-          vimeoVideo.play()
+          vimeoVideo.play();
         }
-        this.emit('videoLoad')
+        this.emit('videoLoad');
       }
-    })
+    });
     this._isDashPlayback = vimeoVideo.isDashPlayback();
-    (this as {player: P}).player = this.createAdaptivePlayer(vimeoVideo);
+    (this as { player: P }).player = this.createAdaptivePlayer(vimeoVideo);
   }
 
   /**
@@ -50,7 +50,7 @@ export default class VideoElement extends EventEmitter {
    */
   getElement (): HTMLVideoElement | undefined {
     if (this.domElement) {
-      return this.domElement
+      return this.domElement;
     }
     return;
   }
@@ -59,10 +59,10 @@ export default class VideoElement extends EventEmitter {
   play () {
     if (this.player) {
       try {
-        this.player.play()
+        this.player.play();
       } catch (error) {
-        this.emit('error', error)
-        throw new Error('[Vimeo] Failed triggering playback, try initializing the element with a valid video before hitting play')
+        this.emit('error', error);
+        throw new Error('[Vimeo] Failed triggering playback, try initializing the element with a valid video before hitting play');
       }
     }
   }
@@ -71,10 +71,10 @@ export default class VideoElement extends EventEmitter {
   pause () {
     if (this.player) {
       try {
-        this.player.pause()
+        this.player.pause();
       } catch (error) {
-        this.emit('error', error)
-        throw new Error('[Vimeo] Failed triggering playback, try initializing the element with a valid video before hitting pause')
+        this.emit('error', error);
+        throw new Error('[Vimeo] Failed triggering playback, try initializing the element with a valid video before hitting pause');
       }
     }
   }
@@ -82,11 +82,11 @@ export default class VideoElement extends EventEmitter {
   /** Stop the video */
   stop () {
     if (this.player) {
-      this.player.pause()
+      this.player.pause();
       if (this.isDashPlayback()) {
-        this.player.seek(0.0)
+        this.player.seek(0.0);
       } else {
-        this.player.currentTime = 0.0
+        this.player.currentTime = 0.0;
       }
     }
   }
@@ -100,9 +100,9 @@ export default class VideoElement extends EventEmitter {
       this.domElement.muted = volume === 0;
       if (volume >= 0.0 && volume <= 1.0) {
         if (this.isDashPlayback()) {
-          this.player.setVolume(volume)
+          this.player.setVolume(volume);
         } else {
-          this.player.volume = volume
+          this.player.volume = volume;
         }
       }
     }
@@ -114,9 +114,9 @@ export default class VideoElement extends EventEmitter {
   getVolume (): number | undefined {
     if (this.player) {
       if (this.isDashPlayback()) {
-        return this.player.getVolume()
+        return this.player.getVolume();
       } else {
-        return this.player.volume
+        return this.player.volume;
       }
     }
     return;
@@ -128,12 +128,12 @@ export default class VideoElement extends EventEmitter {
   isPlaying (): boolean | never {
     if (this.player) {
       if (this.isDashPlayback()) {
-        return !this.player.isPaused()
+        return !this.player.isPaused();
       } else {
-        return !this.player.paused
+        return !this.player.paused;
       }
     } else {
-      throw new Error('[Vimeo] A video has not been loaded yet')
+      throw new Error('[Vimeo] A video has not been loaded yet');
     }
   }
 
@@ -143,12 +143,12 @@ export default class VideoElement extends EventEmitter {
   isPaused (): boolean | undefined {
     if (this.player) {
       if (this.isDashPlayback()) {
-        return this.player.isPaused()
+        return this.player.isPaused();
       } else {
-        return this.player.paused
+        return this.player.paused;
       }
     }
-    return
+    return;
   }
 
   /**
@@ -156,9 +156,9 @@ export default class VideoElement extends EventEmitter {
    */
   isStopped (): boolean | undefined {
     if (this.player) {
-      return this.isPaused() && this.getTime() === 0
+      return this.isPaused() && this.getTime() === 0;
     }
-    return
+    return;
   }
 
   /**
@@ -168,9 +168,9 @@ export default class VideoElement extends EventEmitter {
   setTime (time: number) {
     if (this.player) {
       if (this.isDashPlayback()) {
-        this.player.seek(time)
+        this.player.seek(time);
       } else {
-        this.player.currentTime = time
+        this.player.currentTime = time;
       }
     }
   }
@@ -181,9 +181,9 @@ export default class VideoElement extends EventEmitter {
   getTime (): number | undefined {
     if (this.player) {
       if (this.isDashPlayback()) {
-        return this.player.time()
+        return this.player.time();
       } else {
-        return this.player.currentTime
+        return this.player.currentTime;
       }
     }
     return;
@@ -195,16 +195,16 @@ export default class VideoElement extends EventEmitter {
    * @returns {HTMLElement}
    */
   createElement (vimeoVideo: VimeoVideo): HTMLVideoElement {
-    let domElement = document.createElement('video')
-    domElement.id = 'vimeo-webgl-player-' + vimeoVideo.id
-    domElement.crossOrigin = 'anonymous'
-    domElement.setAttribute('crossorigin', 'anonymous')
-    domElement.muted = vimeoVideo.muted
-    domElement.autoplay = vimeoVideo.autoplay
-    domElement.loop = vimeoVideo.loop
+    const domElement = document.createElement('video');
+    domElement.id = `vimeo-webgl-player-${vimeoVideo.id}`;
+    domElement.crossOrigin = 'anonymous';
+    domElement.setAttribute('crossorigin', 'anonymous');
+    domElement.muted = vimeoVideo.muted;
+    domElement.autoplay = vimeoVideo.autoplay;
+    domElement.loop = vimeoVideo.loop;
     // vimeoVideo.muted && domElement.setAttribute('muted', '')
 
-    return domElement
+    return domElement;
   }
 
   /**
@@ -213,23 +213,23 @@ export default class VideoElement extends EventEmitter {
    * @returns {HTMLElement}
    */
   createAdaptivePlayer (vimeoVideo: VimeoVideo): P {
-    let player: P
+    let player: P;
 
     if (vimeoVideo.isDashPlayback()) {
-      player = dashjs.MediaPlayer().create()
-      player.initialize(this.domElement, vimeoVideo.getAdaptiveURL(), vimeoVideo.autoplay)
+      player = dashjs.MediaPlayer().create();
+      player.initialize(this.domElement, vimeoVideo.getAdaptiveURL(), vimeoVideo.autoplay);
     } else {
-      player = this.domElement
+      player = this.domElement;
 
       if (Util.isiOS()) {
-        this.setiOSPlayerAttributes(player)
+        this.setiOSPlayerAttributes(player);
       }
 
       player.src = vimeoVideo.getFileURL() ?? '';
-      player.load()
+      player.load();
     }
 
-    return player
+    return player;
   }
 
   /**
@@ -237,7 +237,7 @@ export default class VideoElement extends EventEmitter {
    * @param {HTMLElement} vimeoVideo - A <video> element that needs to be configured to play on iOS
    */
   setiOSPlayerAttributes (videoElement: { setAttribute: (arg0: string, arg1: string) => void }) {
-    videoElement.setAttribute('webkit-playsinline', '')
-    videoElement.setAttribute('playsinline', '')
+    videoElement.setAttribute('webkit-playsinline', '');
+    videoElement.setAttribute('playsinline', '');
   }
 }

@@ -1,17 +1,17 @@
-import VideoQuality from './video-quality'
-import VideoElement from './video-element'
-import Util from './util'
-import API from './api'
-import EventEmitter from 'event-emitter-es6'
+import VideoQuality from './video-quality';
+import VideoElement from './video-element';
+import Util from './util';
+import API from './api';
+import EventEmitter from 'event-emitter-es6';
 import * as THREE from 'three';
-import { VimeoAPIResponse } from './types'
+import { VimeoAPIResponse } from './types';
 
 export type VimeoVideoArgs = Partial<{
   quality: VideoQuality
   muted: boolean
   autoplay: boolean
   loop: boolean
-}>
+}>;
 
 /** Class representing a Vimeo video resource */
 export default class VimeoVideo extends EventEmitter {
@@ -33,13 +33,13 @@ export default class VimeoVideo extends EventEmitter {
    * @param {bool} [args.loop = true] - A boolean for looping the video playback when it reaches the end
    */
   constructor (videoId: number, args: VimeoVideoArgs = {}) {
-    super()
+    super();
 
-    this.id = videoId
-    this.selectedQuality = args.quality || VideoQuality.auto
-    this.muted = typeof args.muted !== 'undefined' ? args.muted : false
-    this.autoplay = typeof args.autoplay !== 'undefined' ? args.autoplay : true
-    this.loop = typeof args.loop !== 'undefined' ? args.loop : true
+    this.id = videoId;
+    this.selectedQuality = args.quality || VideoQuality.auto;
+    this.muted = typeof args.muted !== 'undefined' ? args.muted : false;
+    this.autoplay = typeof args.autoplay !== 'undefined' ? args.autoplay : true;
+    this.loop = typeof args.loop !== 'undefined' ? args.loop : true;
     // NOTE: screw this
     /*
     this.onClickAutoplayFix = () => this._onClickAutoplayFix()
@@ -62,11 +62,11 @@ export default class VimeoVideo extends EventEmitter {
   onClickAutoplayFix?: (this: Window, ev: MouseEvent) => any;
   _onClickAutoplayFix () {
     try {
-      this.play()
+      this.play();
     } catch (err) {
       console.warn(err);
     }
-    this.onClickAutoplayFix && window.removeEventListener('click', this.onClickAutoplayFix)
+    this.onClickAutoplayFix && window.removeEventListener('click', this.onClickAutoplayFix);
   }
 
   /**
@@ -75,18 +75,18 @@ export default class VimeoVideo extends EventEmitter {
    */
   loadFromVideoId (videoId: number) {
     if (!videoId) {
-      throw new Error('[Vimeo] No video ID was specified')
+      throw new Error('[Vimeo] No video ID was specified');
     }
 
     if (!this.data) {
       API.getVideo(videoId).then(response => {
-        this.data = response
-        this.setupVideoElement()
+        this.data = response;
+        this.setupVideoElement();
       }).catch(error => {
-        throw new Error(error)
-      })
+        throw new Error(error);
+      });
     } else {
-      this.emit('metadataLoad')
+      this.emit('metadataLoad');
     }
   }
 
@@ -94,7 +94,7 @@ export default class VimeoVideo extends EventEmitter {
    * Load a specific video based on the Vimeo video ID provided to the constructor, for internal class use
    */
   load () {
-    this.loadFromVideoId(this.id)
+    this.loadFromVideoId(this.id);
   }
 
   /**
@@ -104,28 +104,28 @@ export default class VimeoVideo extends EventEmitter {
    */
   getJSONFromVideoDescription (): unknown {
     if (this.data?.description) {
-      let desc = this.data.description
-      let match = desc.match(/(\{.*\})/gms)
+      const desc = this.data.description;
+      const match = desc.match(/(\{.*\})/gms);
       if (match) {
-        return JSON.parse(match[0])
+        return JSON.parse(match[0]);
       }
     } else {
-      console.warn('[Vimeo] No video is loaded')
+      console.warn('[Vimeo] No video is loaded');
     }
-    return null
+    return null;
   }
 
   /**
    * Query wheter the current video is loaded
    * @returns {bool}
    */
-  isLoaded (): this is {data: VimeoAPIResponse, videoElement: VideoElement;} {
+  isLoaded (): this is { data: VimeoAPIResponse, videoElement: VideoElement; } {
     if (this.data && this.videoElement) {
       if (this.videoElement.getElement()) {
-        return true
+        return true;
       }
     }
-    return false
+    return false;
   }
 
   /**
@@ -134,9 +134,9 @@ export default class VimeoVideo extends EventEmitter {
    */
   isPlaying (): boolean |undefined| never {
     if (this.videoElement) {
-      return this.videoElement.isPlaying()
+      return this.videoElement.isPlaying();
     } else {
-      throw new Error('[Vimeo] A video has not been created, yet you are trying to check if it is playing')
+      throw new Error('[Vimeo] A video has not been created, yet you are trying to check if it is playing');
     }
   }
 
@@ -145,9 +145,9 @@ export default class VimeoVideo extends EventEmitter {
    */
   isPaused (): boolean | undefined | never {
     if (this.videoElement) {
-      return this.videoElement.isPaused()
+      return this.videoElement.isPaused();
     } else {
-      throw new Error('[Vimeo] A video has not been created, yet you are trying to check if it is paused')
+      throw new Error('[Vimeo] A video has not been created, yet you are trying to check if it is paused');
     }
   }
 
@@ -156,9 +156,9 @@ export default class VimeoVideo extends EventEmitter {
    */
   isStopped (): boolean | undefined | never {
     if (this.videoElement) {
-      return this.videoElement.isStopped()
+      return this.videoElement.isStopped();
     } else {
-      throw new Error('[Vimeo] A video has not been created, yet you are trying to check if it is stopped')
+      throw new Error('[Vimeo] A video has not been created, yet you are trying to check if it is stopped');
     }
   }
 
@@ -167,9 +167,9 @@ export default class VimeoVideo extends EventEmitter {
    */
   getTime (): number | undefined | never {
     if (this.videoElement) {
-      return this.videoElement.getTime()
+      return this.videoElement.getTime();
     } else {
-      throw new Error('[Vimeo] A video has not been created, yet you are trying to get the time for it')
+      throw new Error('[Vimeo] A video has not been created, yet you are trying to get the time for it');
     }
   }
 
@@ -179,43 +179,43 @@ export default class VimeoVideo extends EventEmitter {
    */
   setTime (time: number) {
     if (this.videoElement) {
-      this.videoElement.setTime(time)
+      this.videoElement.setTime(time);
     } else {
-      throw new Error('[Vimeo] A video has not been created, yet you are trying to set the time for it')
+      throw new Error('[Vimeo] A video has not been created, yet you are trying to set the time for it');
     }
   }
 
   /** Play the video */
   play () {
     if (!this.isLoaded()) {
-      this.setupVideoElement()
+      this.setupVideoElement();
     }
 
-    this.videoElement.play()
+    this.videoElement.play();
 
-    this.emit('play')
+    this.emit('play');
   }
 
   /** Pause the video */
   pause () {
     if (!this.isLoaded()) {
-      this.setupVideoElement()
+      this.setupVideoElement();
     }
 
-    this.videoElement.pause()
+    this.videoElement.pause();
 
-    this.emit('pause')
+    this.emit('pause');
   }
 
   /** Stop the video */
   stop () {
     if (!this.isLoaded()) {
-      this.setupVideoElement()
+      this.setupVideoElement();
     }
 
-    this.videoElement.stop()
+    this.videoElement.stop();
 
-    this.emit('stop')
+    this.emit('stop');
   }
 
   /**
@@ -224,30 +224,30 @@ export default class VimeoVideo extends EventEmitter {
    */
   setVolume (volume: number) {
     if (volume === 0) {
-      this.muted = true
-      this.videoElement!.setVolume(volume)
+      this.muted = true;
+      this.videoElement!.setVolume(volume);
     } else if (volume > 0) {
-      this.muted = false
-      this.videoElement!.setVolume(volume)
+      this.muted = false;
+      this.videoElement!.setVolume(volume);
     }
   }
 
   /** Muted the video */
   mute () {
-    this.setVolume(0.0)
+    this.setVolume(0.0);
   }
 
   /** Unmute the video */
   unmute () {
-    this.setVolume(1.0)
+    this.setVolume(1.0);
   }
 
-  setupVideoElement (): asserts this is {videoElement: VideoElement} {
-    this.videoElement = new VideoElement(this)
+  setupVideoElement (): asserts this is { videoElement: VideoElement } {
+    this.videoElement = new VideoElement(this);
     this.videoElement.on('videoLoad', () => {
-      this.setupTexture()
-      this.emit('videoLoad', this.texture)
-    })
+      this.setupTexture();
+      this.emit('videoLoad', this.texture);
+    });
   }
 
   /**
@@ -255,13 +255,13 @@ export default class VimeoVideo extends EventEmitter {
    */
   setupTexture () {
     if (!this.videoElement || this.videoElement.getElement()?.src === '') {
-      throw new Error('[Vimeo] No video has been loaded yet')
+      throw new Error('[Vimeo] No video has been loaded yet');
     } else {
-      this.texture = new THREE.VideoTexture(this.videoElement.getElement()!)
-      this.texture.minFilter = THREE.NearestFilter
-      this.texture.magFilter = THREE.LinearFilter
-      this.texture.format = THREE.RGBFormat
-      this.texture.generateMipmaps = true
+      this.texture = new THREE.VideoTexture(this.videoElement.getElement()!);
+      this.texture.minFilter = THREE.NearestFilter;
+      this.texture.magFilter = THREE.LinearFilter;
+      this.texture.format = THREE.RGBFormat;
+      this.texture.generateMipmaps = true;
     }
   }
 
@@ -271,9 +271,9 @@ export default class VimeoVideo extends EventEmitter {
    */
   getWidth (): number | null {
     if (this.data) {
-      return this.data.width
+      return this.data.width;
     }
-    return null
+    return null;
   }
 
   /**
@@ -282,9 +282,9 @@ export default class VimeoVideo extends EventEmitter {
    */
   getHeight (): number | null {
     if (this.data) {
-      return this.data.height
+      return this.data.height;
     }
-    return null
+    return null;
   }
 
   /**
@@ -293,9 +293,9 @@ export default class VimeoVideo extends EventEmitter {
    */
   getFileURL (): string | undefined {
     if (this.isAdaptivePlayback()) {
-      return this.getAdaptiveURL()
+      return this.getAdaptiveURL();
     } else {
-      return this.getProgressiveFileURL(this.selectedQuality)
+      return this.getProgressiveFileURL(this.selectedQuality);
     }
   }
 
@@ -306,15 +306,15 @@ export default class VimeoVideo extends EventEmitter {
   getAdaptiveURL (): string | undefined {
     if (this.isDashPlayback()) {
       if (this.data) {
-        return this.data.play.dash.link
+        return this.data.play.dash.link;
       } else {
-        console.warn('[Vimeo] There was a problem loading your video, did you provide a valid Vimeo video ID?')
+        console.warn('[Vimeo] There was a problem loading your video, did you provide a valid Vimeo video ID?');
       }
     } else {
       if (this.data) {
-        return this.data.play.hls.link
+        return this.data.play.hls.link;
       } else {
-        console.warn('[Vimeo] There was a problem loading your video, did you provide a valid Vimeo video ID?')
+        console.warn('[Vimeo] There was a problem loading your video, did you provide a valid Vimeo video ID?');
       }
     }
     return;
@@ -327,34 +327,34 @@ export default class VimeoVideo extends EventEmitter {
    */
   getProgressiveFileURL (quality: VideoQuality): string | undefined {
     if (this.isLive()) {
-      console.warn('[Vimeo] This is a live video! There are no progressive video files availale.')
+      console.warn('[Vimeo] This is a live video! There are no progressive video files availale.');
     } else {
       if (this.data) {
         if (this.data.play.progressive) {
           this.data.play.progressive.sort(function (a, b) {
-            return a.height < b.height ? 1 : -1
-          })
+            return a.height < b.height ? 1 : -1;
+          });
 
-          var preferredQualities = []
-          for (var i = 0; i < this.data.play.progressive.length; i++) {
+          const preferredQualities = [];
+          for (let i = 0; i < this.data.play.progressive.length; i++) {
             if (quality > this.data.play.progressive[i].height) {
-              preferredQualities.push(this.data.play.progressive[i])
+              preferredQualities.push(this.data.play.progressive[i]);
             } else if (quality === this.data.play.progressive[i].height) {
-              return this.data.play.progressive[i].link
+              return this.data.play.progressive[i].link;
             }
           }
 
           if (preferredQualities.length === 0) {
-            var file = this.data.play.progressive[this.data.play.progressive.length - 1]
-            console.log('[Vimeo] This video does not have a ' + quality + 'p resolution. Defaulting to ' + file.height + 'p.')
-            return file.link
+            const file = this.data.play.progressive[this.data.play.progressive.length - 1];
+            console.log(`[Vimeo] This video does not have a ${quality}p resolution. Defaulting to ${file.height}p.`);
+            return file.link;
           } else {
-            console.log('[Vimeo] This video does not have a ' + quality + ' resolution. Defaulting to ' + preferredQualities[0].height + 'p.')
-            return preferredQualities[0].link
+            console.log(`[Vimeo] This video does not have a ${quality} resolution. Defaulting to ${preferredQualities[0].height}p.`);
+            return preferredQualities[0].link;
           }
         }
       } else {
-        console.error('[Vimeo] No video available')
+        console.error('[Vimeo] No video available');
       }
     }
     return;
@@ -366,9 +366,9 @@ export default class VimeoVideo extends EventEmitter {
    */
   isLive (): boolean {
     if (this.data) {
-      return !!this.data.live && this.data.live.status === 'streaming'
+      return !!this.data.live && this.data.live.status === 'streaming';
     }
-    return false
+    return false;
   }
 
   /**
@@ -376,7 +376,7 @@ export default class VimeoVideo extends EventEmitter {
    * @returns {bool}
    */
   isAdaptivePlayback (): boolean {
-    return this.selectedQuality === VideoQuality.auto || this.selectedQuality === VideoQuality.adaptive
+    return this.selectedQuality === VideoQuality.auto || this.selectedQuality === VideoQuality.adaptive;
   }
 
   /**
