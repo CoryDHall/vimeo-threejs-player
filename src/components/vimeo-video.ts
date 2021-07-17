@@ -59,15 +59,15 @@ export default class VimeoVideo extends EventEmitter {
   /**
    * An internal method that removes that hits play for autoplay fix event listener, should not be used from outside the class
    */
-  onClickAutoplayFix?: (this: Window, ev: MouseEvent) => any;
-  _onClickAutoplayFix () {
-    try {
-      this.play();
-    } catch (err) {
-      console.warn(err);
-    }
-    this.onClickAutoplayFix && window.removeEventListener('click', this.onClickAutoplayFix);
-  }
+  // onClickAutoplayFix?: (this: Window, ev: MouseEvent) => any;
+  // _onClickAutoplayFix () {
+  //   try {
+  //     this.play();
+  //   } catch (err) {
+  //     console.warn(err);
+  //   }
+  //   this.onClickAutoplayFix && window.removeEventListener('click', this.onClickAutoplayFix);
+  // }
 
   /**
    * Load a specific video by providing a Vimeo video ID
