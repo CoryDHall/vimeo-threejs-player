@@ -21,14 +21,20 @@ export default class API {
    * @returns {Promise}
    */
   static getVideo(videoId: number): Promise<VimeoAPIResponse> {
+    const uri = API.path(`/videos/${videoId}`);
 
-    return new Promise<VimeoAPIResponse>((resolve, reject) => {
-      fetch(API.path(`/videos/${videoId}`)).then(res => {
+    const fInProgress = API._fetchCache[uri] = API._fetchCache[uri] ?? new Promise<VimeoAPIResponse>((resolve, reject) => {
+
+      fetch(uri).then(res => {
         API.sendResponse(res, resolve, reject);
+      }).then(() => {
+        if (API._fetchCache[uri])
+          delete API._fetchCache[uri];
       });
     });
+    return fInProgress;
   }
-
+  static _fetchCache: Record<string, Promise<VimeoAPIResponse>> = {};
   /**
    * A method for requesting Vimeo albums by album id
    * @param {number} albumId - The Vimeo album id you would like to query (e.g 5528679)
