@@ -11,7 +11,7 @@ export default class API {
    * @param {string} endpoint - The endpoint you would like to add the full request URL (e.g /videos/video-id)
    * @returns {string}
    */
-  static path (endpoint: string) {
+  static path (endpoint: string): string {
     return `${ApiPath}?path=${endpoint}?fields=uri,play,width,height,live,description,title`;
   }
 
@@ -20,7 +20,7 @@ export default class API {
    * @param {number} videoId - The Vimeo video id you would like to query (e.g 296928206)
    * @returns {Promise}
    */
-  static getVideo(videoId: number) {
+  static getVideo(videoId: number): Promise<VimeoAPIResponse> {
 
     return new Promise<VimeoAPIResponse>((resolve, reject) => {
       fetch(API.path(`/videos/${videoId}`)).then(res => {
@@ -34,7 +34,7 @@ export default class API {
    * @param {number} albumId - The Vimeo album id you would like to query (e.g 5528679)
    * @returns {Promise}
    */
-  static getAlbumVideos(albumId: number) {
+  static getAlbumVideos(albumId: number): Promise<{ data: VimeoAPIResponse[]; }> {
     return new Promise<{ data: VimeoAPIResponse[] }>((resolve, reject) => {
       fetch(API.path(`/albums/${albumId}/videos`)).then(res => {
         API.sendResponse(res, resolve, reject);
