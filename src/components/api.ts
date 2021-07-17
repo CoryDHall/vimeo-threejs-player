@@ -34,7 +34,7 @@ export default class API {
     });
     return fInProgress;
   }
-  static _fetchCache: Record<string, Promise<VimeoAPIResponse>> = {};
+  static _fetchCache: Record<string, Promise<VimeoAPIResponse> | undefined> = {};
   /**
    * A method for requesting Vimeo albums by album id
    * @param {number} albumId - The Vimeo album id you would like to query (e.g 5528679)
