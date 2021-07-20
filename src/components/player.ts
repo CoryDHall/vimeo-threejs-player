@@ -1,5 +1,5 @@
 import VimeoVideo, { VimeoVideoArgs } from './vimeo-video';
-import API from './api';
+import { CreateAPI } from './api';
 import EventEmitter from 'event-emitter-es6';
 import VideoQuality from './video-quality';
 
@@ -21,7 +21,7 @@ export default class Player extends EventEmitter {
    * @param {bool} [args.autoplay = true] - A boolean for loading the video and automatically playing it once it has loaded
    * @param {bool} [args.loop = true] - A boolean for looping the video playback when it reaches the end
    */
-  constructor (videoId: string | number, args: PlayerArgs = {}) {
+  constructor (videoId: string | number, args: PlayerArgs = {}, readonly API = CreateAPI()) {
     super();
 
     if (!videoId) {
@@ -29,7 +29,7 @@ export default class Player extends EventEmitter {
     }
 
     this.id = this.parseVideoId(videoId);
-    this.video = new VimeoVideo(this.id, args);
+    this.video = new VimeoVideo(this.id, args, this.API);
     this.bindEvents();
 
     if (args.autoload) {
@@ -46,13 +46,13 @@ export default class Player extends EventEmitter {
    * @param {bool} [args.autoplay = true] - A boolean for loading the video and automatically playing it once it has loaded
    * @param {bool} [args.loop = true] - A boolean for looping the video playback when it reaches the end
    */
-  static loadPlayersByAlbum (albumId: number, args: PlayerArgs = {}) {
+  static loadPlayersByAlbum (albumId: number, args: PlayerArgs = {}, API = CreateAPI()) {
     const players: Player[] = [];
 
     return new Promise<Player[]>((resolve, reject) => {
       API.getAlbumVideos(albumId).then(resp => {
         for (let i = 0; i < resp.data.length; i++) {
-          const player = new Player(resp.data[i].uri, args);
+          const player = new Player(resp.data[i].uri, args, API);
           player.video.data = resp.data[i];
           players.push(player);
         }

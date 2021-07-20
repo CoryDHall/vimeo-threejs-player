@@ -2,17 +2,18 @@
 
 import { VimeoAPIResponse } from "./types";
 
-const ApiPath = '/vimeo/api';
 
 /** A static class that interfaces with the server-side Vimeo API */
 export default class API {
+  static ApiPath = '/vimeo/api';
+
   /**
    * A util method to modify the endpoint to and return a full API request url
    * @param {string} endpoint - The endpoint you would like to add the full request URL (e.g /videos/video-id)
    * @returns {string}
    */
   static path (endpoint: string): string {
-    return `${ApiPath}?path=${endpoint}?fields=uri,play,width,height,live,description,title`;
+    return `${this.ApiPath}?path=${endpoint}?fields=uri,play,width,height,live,description,title`;
   }
 
   /**
@@ -21,15 +22,15 @@ export default class API {
    * @returns {Promise}
    */
   static getVideo(videoId: number): Promise<VimeoAPIResponse> {
-    const uri = API.path(`/videos/${videoId}`);
+    const uri = this.path(`/videos/${videoId}`);
 
-    const fInProgress = API._fetchCache[uri] = API._fetchCache[uri] ?? new Promise<VimeoAPIResponse>((resolve, reject) => {
+    const fInProgress = this._fetchCache[uri] = this._fetchCache[uri] ?? new Promise<VimeoAPIResponse>((resolve, reject) => {
 
       fetch(uri).then(res => {
-        API.sendResponse(res, resolve, reject);
+        this.sendResponse(res, resolve, reject);
       }).then(() => {
-        if (API._fetchCache[uri])
-          delete API._fetchCache[uri];
+        if (this._fetchCache[uri])
+          delete this._fetchCache[uri];
       });
     });
     return fInProgress;
@@ -42,8 +43,8 @@ export default class API {
    */
   static getAlbumVideos(albumId: number): Promise<{ data: VimeoAPIResponse[]; }> {
     return new Promise<{ data: VimeoAPIResponse[] }>((resolve, reject) => {
-      fetch(API.path(`/albums/${albumId}/videos`)).then(res => {
-        API.sendResponse(res, resolve, reject);
+      fetch(this.path(`/albums/${albumId}/videos`)).then(res => {
+        this.sendResponse(res, resolve, reject);
       });
     });
   }
@@ -63,4 +64,10 @@ export default class API {
       }
     });
   }
+}
+
+export function CreateAPI(apiPath: string = API.ApiPath) {
+  return class extends API {
+    static ApiPath = apiPath;
+  };
 }

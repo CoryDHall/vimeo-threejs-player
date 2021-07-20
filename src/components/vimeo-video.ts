@@ -1,10 +1,12 @@
 import VideoQuality from './video-quality';
 import VideoElement from './video-element';
 import Util from './util';
-import API from './api';
+import { CreateAPI } from './api';
 import EventEmitter from 'event-emitter-es6';
 import * as THREE from 'three';
 import { VimeoAPIResponse } from './types';
+import { vimeoLogString } from './vimeoLogString';
+import { VimeoError } from './VimeoError';
 
 export type VimeoVideoArgs = Partial<{
   quality: VideoQuality
@@ -32,7 +34,7 @@ export default class VimeoVideo extends EventEmitter {
    * @param {bool} [args.autoplay = true] - A boolean for loading the video and automatically playing it once it has loaded
    * @param {bool} [args.loop = true] - A boolean for looping the video playback when it reaches the end
    */
-  constructor (videoId: number, args: VimeoVideoArgs = {}) {
+  constructor (videoId: number, args: VimeoVideoArgs = {}, readonly API = CreateAPI()) {
     super();
 
     this.id = videoId;
@@ -40,34 +42,7 @@ export default class VimeoVideo extends EventEmitter {
     this.muted = typeof args.muted !== 'undefined' ? args.muted : false;
     this.autoplay = typeof args.autoplay !== 'undefined' ? args.autoplay : true;
     this.loop = typeof args.loop !== 'undefined' ? args.loop : true;
-    // NOTE: screw this
-    /*
-    this.onClickAutoplayFix = () => this._onClickAutoplayFix()
-
-    if (this.autoplay) {
-      canAutoPlay.video({ muted: this.muted, timeout: 20000 }).then(({ result, error }) => {
-        if (result === false) {
-          console.warn('[Vimeo] Autoplay not available on this browser', error)
-          this.autoplay = false
-
-          window.addEventListener('click', this.onClickAutoplayFix)
-        }
-      })
-    } */
   }
-
-  /**
-   * An internal method that removes that hits play for autoplay fix event listener, should not be used from outside the class
-   */
-  // onClickAutoplayFix?: (this: Window, ev: MouseEvent) => any;
-  // _onClickAutoplayFix () {
-  //   try {
-  //     this.play();
-  //   } catch (err) {
-  //     console.warn(err);
-  //   }
-  //   this.onClickAutoplayFix && window.removeEventListener('click', this.onClickAutoplayFix);
-  // }
 
   /**
    * Load a specific video by providing a Vimeo video ID
@@ -75,11 +50,11 @@ export default class VimeoVideo extends EventEmitter {
    */
   loadFromVideoId (videoId: number) {
     if (!videoId) {
-      throw new Error('[Vimeo] No video ID was specified');
+      throw new VimeoError('No video ID was specified');
     }
 
     if (!this.data) {
-      API.getVideo(videoId).then(response => {
+      this.API.getVideo(videoId).then(response => {
         this.data = response;
         this.setupVideoElement();
       }).catch(error => {
@@ -110,7 +85,7 @@ export default class VimeoVideo extends EventEmitter {
         return JSON.parse(match[0]);
       }
     } else {
-      console.warn('[Vimeo] No video is loaded');
+      console.warn(vimeoLogString('No video is loaded'));
     }
     return null;
   }
@@ -136,7 +111,7 @@ export default class VimeoVideo extends EventEmitter {
     if (this.videoElement) {
       return this.videoElement.isPlaying();
     } else {
-      throw new Error('[Vimeo] A video has not been created, yet you are trying to check if it is playing');
+      throw new VimeoError('A video has not been created, yet you are trying to check if it is playing');
     }
   }
 
@@ -147,7 +122,7 @@ export default class VimeoVideo extends EventEmitter {
     if (this.videoElement) {
       return this.videoElement.isPaused();
     } else {
-      throw new Error('[Vimeo] A video has not been created, yet you are trying to check if it is paused');
+      throw new VimeoError('A video has not been created, yet you are trying to check if it is paused');
     }
   }
 
@@ -158,7 +133,7 @@ export default class VimeoVideo extends EventEmitter {
     if (this.videoElement) {
       return this.videoElement.isStopped();
     } else {
-      throw new Error('[Vimeo] A video has not been created, yet you are trying to check if it is stopped');
+      throw new VimeoError('A video has not been created, yet you are trying to check if it is stopped');
     }
   }
 
@@ -169,7 +144,7 @@ export default class VimeoVideo extends EventEmitter {
     if (this.videoElement) {
       return this.videoElement.getTime();
     } else {
-      throw new Error('[Vimeo] A video has not been created, yet you are trying to get the time for it');
+      throw new VimeoError('A video has not been created, yet you are trying to get the time for it');
     }
   }
 
@@ -181,7 +156,7 @@ export default class VimeoVideo extends EventEmitter {
     if (this.videoElement) {
       this.videoElement.setTime(time);
     } else {
-      throw new Error('[Vimeo] A video has not been created, yet you are trying to set the time for it');
+      throw new VimeoError('A video has not been created, yet you are trying to set the time for it');
     }
   }
 
@@ -255,7 +230,7 @@ export default class VimeoVideo extends EventEmitter {
    */
   setupTexture () {
     if (!this.videoElement || this.videoElement.getElement()?.src === '') {
-      throw new Error('[Vimeo] No video has been loaded yet');
+      throw new VimeoError('No video has been loaded yet');
     } else {
       this.texture = new THREE.VideoTexture(this.videoElement.getElement()!);
       this.texture.minFilter = THREE.NearestFilter;
@@ -308,13 +283,13 @@ export default class VimeoVideo extends EventEmitter {
       if (this.data) {
         return this.data.play.dash.link;
       } else {
-        console.warn('[Vimeo] There was a problem loading your video, did you provide a valid Vimeo video ID?');
+        console.warn(vimeoLogString('There was a problem loading your video, did you provide a valid Vimeo video ID?'));
       }
     } else {
       if (this.data) {
         return this.data.play.hls.link;
       } else {
-        console.warn('[Vimeo] There was a problem loading your video, did you provide a valid Vimeo video ID?');
+        console.warn(vimeoLogString('There was a problem loading your video, did you provide a valid Vimeo video ID?'));
       }
     }
     return;
@@ -327,7 +302,7 @@ export default class VimeoVideo extends EventEmitter {
    */
   getProgressiveFileURL (quality: VideoQuality): string | undefined {
     if (this.isLive()) {
-      console.warn('[Vimeo] This is a live video! There are no progressive video files availale.');
+      console.warn(vimeoLogString('This is a live video! There are no progressive video files availale.'));
     } else {
       if (this.data) {
         if (this.data.play.progressive) {
@@ -354,7 +329,7 @@ export default class VimeoVideo extends EventEmitter {
           }
         }
       } else {
-        console.error('[Vimeo] No video available');
+        console.error(vimeoLogString('No video available'));
       }
     }
     return;

@@ -2,6 +2,7 @@ import Util from './util';
 import dashjs from 'dashjs';
 import EventEmitter from 'event-emitter-es6';
 import VimeoVideo from './vimeo-video';
+import { VimeoError } from './VimeoError';
 
 /** Class representing a DOM video element */
 
@@ -62,7 +63,7 @@ export default class VideoElement extends EventEmitter {
         this.player.play();
       } catch (error) {
         this.emit('error', error);
-        throw new Error('[Vimeo] Failed triggering playback, try initializing the element with a valid video before hitting play');
+        throw new VimeoError('Failed triggering playback, try initializing the element with a valid video before hitting play');
       }
     }
   }
@@ -74,7 +75,7 @@ export default class VideoElement extends EventEmitter {
         this.player.pause();
       } catch (error) {
         this.emit('error', error);
-        throw new Error('[Vimeo] Failed triggering playback, try initializing the element with a valid video before hitting pause');
+        throw new VimeoError('Failed triggering playback, try initializing the element with a valid video before hitting pause');
       }
     }
   }
@@ -133,7 +134,7 @@ export default class VideoElement extends EventEmitter {
         return !this.player.paused;
       }
     } else {
-      throw new Error('[Vimeo] A video has not been loaded yet');
+      throw new VimeoError('A video has not been loaded yet');
     }
   }
 
